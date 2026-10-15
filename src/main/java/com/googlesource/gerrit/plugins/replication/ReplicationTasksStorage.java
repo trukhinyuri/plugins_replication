@@ -15,6 +15,7 @@
 package com.googlesource.gerrit.plugins.replication;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
@@ -227,8 +228,8 @@ public class ReplicationTasksStorage {
   }
 
   private Stream<Path> walkNonDirs(Path path) {
-    try {
-      return Files.list(path).flatMap(sub -> walkNonDirs(sub));
+    try (Stream<Path> paths = Files.list(path)) {
+      return paths.collect(toList()).stream().flatMap(this::walkNonDirs);
     } catch (NotDirectoryException e) {
       return Stream.of(path);
     } catch (Exception e) {
